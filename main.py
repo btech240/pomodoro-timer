@@ -12,11 +12,12 @@ WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
 # Create the User Interface
 window = Tk()
 window.title("Pomodoro")
-window.config(padx=100, pady=50, bg=YELLOW)
+window.config(padx=50, pady=50, bg=YELLOW)
 
 # Create the canvas for the image
 canvas = Canvas(width=200, height=224, background=YELLOW, highlightthickness=0)
@@ -26,13 +27,13 @@ timer_text = canvas.create_text(
     100, 130, text="00:00", font=(FONT_NAME, 32, "bold"))
 canvas.grid(column=1, row=1)
 
-# Create main label
-timer_label = Label(text="Timer", font=(
+# Create main label, changes based on status
+title_label = Label(text="Timer", font=(
     FONT_NAME, 40, "bold"), fg=RED, background=YELLOW)
-timer_label.grid(column=1, row=0)
+title_label.grid(column=1, row=0)
 
-# Create checkmarks label
-checkmarks_label = Label(text="✓", font=(
+# Create checkmarks label, adds checkmarks as we complete work sessions
+checkmarks_label = Label(text="", font=(
     FONT_NAME, 40, "bold"), fg=GREEN, background=YELLOW)
 checkmarks_label.grid(column=1, row=3)
 
@@ -43,19 +44,22 @@ def start_timer():
     reps += 1
 
     if reps % 8 == 0:
-        timer_label.config(text="Long Break Timer", fg=RED)
-        countdown(LONG_BREAK_MIN * 60)
+        title_label.config(text="Long Break", fg=RED)
+        countdown(LONG_BREAK_MIN * 1)
     elif reps % 2 == 0:
-        timer_label.config(text="Short Break Timer", fg=PINK)
-        countdown(SHORT_BREAK_MIN * 60)
+        title_label.config(text="Short Break", fg=PINK)
+        countdown(SHORT_BREAK_MIN * 1)
     else:
-        timer_label.config(text="Work Timer", fg=GREEN)
-        countdown(WORK_MIN * 60)
+        title_label.config(text="Work", fg=GREEN)
+        countdown(WORK_MIN * 1)
 
 
 def reset_clicked():
-    # Make Reset button do action
-    pass
+    # Make Reset clear all labels
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    checkmarks_label.config(text="")
+    title_label.config(text="Timer")
 
 
 def countdown(count):
@@ -70,9 +74,14 @@ def countdown(count):
     # Display the remaining time
     canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
     if count > 0:
-        window.after(1000, countdown, count - 1)
+        global timer
+        timer = window.after(1000, countdown, count - 1)
     else:
         start_timer()
+        marks = ""
+        for _ in range(math.floor(reps/2)):
+            marks += "✓"
+        checkmarks_label.config(text=marks)
 
 
 # Create Start Button
