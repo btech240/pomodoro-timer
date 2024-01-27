@@ -1,3 +1,5 @@
+import math
+import time
 from tkinter import *
 
 # Initialize constants
@@ -19,7 +21,8 @@ window.config(padx=100, pady=50, bg=YELLOW)
 canvas = Canvas(width=200, height=224, background=YELLOW, highlightthickness=0)
 tomato_img = PhotoImage(file="tomato.png")
 canvas.create_image(100, 112, image=tomato_img)
-canvas.create_text(100, 130, text="00:00", font=(FONT_NAME, 32, "bold"))
+timer_text = canvas.create_text(
+    100, 130, text="00:00", font=(FONT_NAME, 32, "bold"))
 canvas.grid(column=1, row=1)
 
 # Create main label
@@ -28,19 +31,34 @@ timer_label = Label(text="Timer", font=(
 timer_label.grid(column=1, row=0)
 
 # Create checkmarks label
-timer_label = Label(text="✓", font=(
+checkmarks_label = Label(text="✓", font=(
     FONT_NAME, 40, "bold"), fg=GREEN, background=YELLOW)
-timer_label.grid(column=1, row=3)
+checkmarks_label.grid(column=1, row=3)
 
 
 def start_clicked():
-    # Make button do action
-    pass
+    # When start button is clicked, call the countdown function
+    countdown(WORK_MIN * 60)
 
 
 def reset_clicked():
-    # Make Rebutton do action
+    # Make Reset button do action
     pass
+
+
+def countdown(count):
+    # Create the timer display
+
+    # Covert seconds to minutes for display
+    count_min = math.floor(count / 60)
+    count_sec = count % 60
+    if count_sec < 10:
+        count_sec = f"0{count_sec}"
+
+    # Display the remaining time
+    canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
+    if count > 0:
+        window.after(1000, countdown, count - 1)
 
 
 # Create Start Button
